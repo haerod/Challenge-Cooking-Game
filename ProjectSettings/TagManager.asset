@@ -6,8 +6,7 @@ TagManager:
   tags:
   - PickUp
   - Table
-  - Bread
-  - Cheese
+  - Machine
   layers:
   - Default
   - TransparentFX

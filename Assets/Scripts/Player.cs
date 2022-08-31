@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -15,7 +16,7 @@ public class Player : MonoBehaviour
     [Header("--Pickup Settings--")] 
     [SerializeField] private Transform heldAnchor;
     public bool canGrab = true;
-    [SerializeField] private GameObject heldObj;
+    public GameObject heldObj;
 
 
     [Header("--Physics Parameters--")] 
@@ -40,24 +41,14 @@ public class Player : MonoBehaviour
 
     private void Mouvement()
     {
-        if (characterController.isGrounded)
+        if (characterController.isGrounded && (Input.GetAxis("Horizontal")!= 0 || Input.GetAxis("Vertical") != 0))
         {
     
             moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0.0f, Input.GetAxis("Vertical"));
             moveDirection *= speed;
-            
            
            float angle = Mathf.Atan2(Input.GetAxis("Horizontal"),Input.GetAxis("Vertical")) * Mathf.Rad2Deg; // Fait rotate le player
-           if (angle != 0) // Si y'a pas ça, le joueur retourne tout droit quand on touche plus les touches
-           {
-               _3DObj.transform.rotation =Quaternion.Euler(new Vector3(0, angle, 0));
-           }
-            
-            if (Input.GetButton("Jump"))
-            {
-                // si on veut un jump
-                //moveDirection.y = jumpSpeed;
-            }
+           _3DObj.transform.rotation =Quaternion.Euler(new Vector3(0, angle, 0));
         }
         moveDirection.y -= gravity * Time.deltaTime;
         characterController.Move(moveDirection * Time.deltaTime);    
@@ -65,33 +56,27 @@ public class Player : MonoBehaviour
 
     private void PickUp()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (!Input.GetMouseButtonDown(0)) return; 
+        
+        if (heldObj == null)
         {
-            if (heldObj == null)
-            {
-                if (Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange))
-                {
-                    if (hit.transform.CompareTag("PickUp")) // Attrape l'object
-                    {
-                        canGrab = false;
-                        heldObj = hit.transform.gameObject;
-                        heldObj.transform.position = heldAnchor.position;
-                        heldObj.transform.parent = heldAnchor;
-                        Feedback();
-                        
-                    }
-                }
-            }
-            else // Lache l'object 
-            {
-                if (heldObj.GetComponent<FoodScript>().canPose)
-                {
-                    heldObj.transform.parent = null;
-                    heldObj = null;
-                    canGrab = true;
-                    Feedback();
-                }
-            }
+            if (!Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange)) return;
+            if (!hit.transform.CompareTag("PickUp")) return;
+            
+            canGrab = false;
+            heldObj = hit.transform.gameObject;
+            heldObj.transform.position = heldAnchor.position;
+            heldObj.transform.parent = heldAnchor;
+            Feedback();
+        }
+        else // Lache l'object 
+        {
+            if (!heldObj.GetComponent<FoodScript>().canPose) return;
+            
+            heldObj.transform.parent = null;
+            heldObj = null;
+            canGrab = true;
+            Feedback();
         }
     }
 
@@ -110,7 +95,7 @@ public class Player : MonoBehaviour
             FeedbackArmR.transform.localScale = new Vector3(0f, 0f, 0f);
             
         }
-        if (canGrab == false )
+        else
         {
             ArmL.transform.localScale =  new Vector3(0f, 0f, 0f);
             ArmR.transform.localScale =  new Vector3(0f, 0f, 0f);
