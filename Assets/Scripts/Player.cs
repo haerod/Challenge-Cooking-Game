@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -17,6 +16,7 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform heldAnchor;
     public bool canGrab = true;
     public GameObject heldObj;
+    private GameObject MachineInFront;
 
 
     [Header("--Physics Parameters--")] 
@@ -37,6 +37,8 @@ public class Player : MonoBehaviour
         Mouvement();
 
         PickUp();
+
+        InteractionMachineFinish();
     }
 
     private void Mouvement()
@@ -61,13 +63,15 @@ public class Player : MonoBehaviour
         if (heldObj == null)
         {
             if (!Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange)) return;
+
             if (!hit.transform.CompareTag("PickUp")) return;
             
-            canGrab = false;
             heldObj = hit.transform.gameObject;
             heldObj.transform.position = heldAnchor.position;
             heldObj.transform.parent = heldAnchor;
+            canGrab = false;
             Feedback();
+
         }
         else // Lache l'object 
         {
@@ -79,8 +83,24 @@ public class Player : MonoBehaviour
             Feedback();
         }
     }
+    private void InteractionMachineFinish()
+    {
+        if (MachineInFront == null)
+        {
+            if (!Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange)) return;
 
-    private void Feedback()
+            if (!hit.transform.CompareTag("Machine")) return;
+            MachineInFront = hit.transform.gameObject;
+            MachineInFront.GetComponent<Machine>().canGetFood = true;
+        }
+        else
+        {
+            if (hit.transform.CompareTag("Machine")) return;
+            MachineInFront.GetComponent<Machine>().canGetFood = false;
+            MachineInFront = null;
+        }
+    }
+    public void Feedback()
     {
         GameObject ArmL = GameObject.Find("Arm_L");
         GameObject ArmR = GameObject.Find("Arm_R");
@@ -109,6 +129,10 @@ public class Player : MonoBehaviour
         if (Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange) && hit.transform.CompareTag("PickUp")) // Seulement si on peut attraper l'object
         {
             Gizmos.color = new Color(r: 1f, g: 0.07f, b: 0f); //red  
+        }
+        if (Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange) && hit.transform.CompareTag("Machine")) // Seulement si on peut attraper l'object
+        {
+            Gizmos.color = new Color(r: 0f, g: 0.00f, b: 1f); //red  
         }
         Gizmos.DrawLine(transform.position, heldAnchor.transform.position);
     }

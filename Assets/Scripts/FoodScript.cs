@@ -1,4 +1,7 @@
 
+using System;
+using System.Collections.Generic;
+using UnityEditor.Profiling.Memory.Experimental;
 using UnityEngine;
 
 public class FoodScript : MonoBehaviour
@@ -9,6 +12,11 @@ public class FoodScript : MonoBehaviour
     [Header("--FoodName--")] 
     public string foodName;
 
+    private GameObject cheese;
+    public bool mixingFood;
+
+    public List<Recipe> recipes;
+
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Machine"))
@@ -16,17 +24,36 @@ public class FoodScript : MonoBehaviour
             other.gameObject.GetComponent<Machine>().canUseMachine = true;
             other.gameObject.GetComponent<Machine>().foodObj = this.gameObject;
             other.gameObject.GetComponent<Machine>().foodName = foodName;
-
-            // other.gameObject.GetComponent<Machine>().CookedMachine(); // Envoie la fonction au script Machine
+            
+// Envoie la fonction au script Machine// 
         }
-        if (other.CompareTag("PickUp")) return; // Si il y a un object sur la table ne pose pas l'object
+
+        if (other.CompareTag("PickUp"))
+        {
+            canPose = false;
+            if (other.GetComponent<FoodScript>().foodName == foodName)
+            {
+                mixingFood = true;
+                if (Input.GetMouseButtonDown(0))
+                {
+                    print("qwack");
+                    canPose = true;
+                    Instantiate(cheese, other.transform.position, other.transform.rotation);
+                    Destroy(other);
+                    Destroy(this);
+                }
+                
+            }
+        }
 
         if (other.CompareTag("Table"))
         {
             canPose = true;
         }
-    }
 
+    }
+    
+    
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Table"))
@@ -38,5 +65,17 @@ public class FoodScript : MonoBehaviour
         {
             other.gameObject.GetComponent<Machine>().canUseMachine = false;
         }
+
+        // if (other.CompareTag("PickUp") || other.GetComponent<FoodScript>().foodName != foodName) // erreur ici
+        
+        {
+           // mixingFood = false;
+        }
     }
+}
+
+[Serializable] public class Recipe // Class : Stocker des variables
+{
+    public string foodName;
+    public GameObject mixingFood;
 }
