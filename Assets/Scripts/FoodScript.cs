@@ -1,7 +1,6 @@
 
 using System;
 using System.Collections.Generic;
-using UnityEditor.Profiling.Memory.Experimental;
 using UnityEngine;
 
 public class FoodScript : MonoBehaviour
@@ -9,13 +8,26 @@ public class FoodScript : MonoBehaviour
     [Header("--CanPose--")] 
     public bool canPose;
 
-    [Header("--FoodName--")] 
+    [Header("--FoodName--")]
     public string foodName;
 
-    private GameObject cheese;
-    public bool mixingFood;
+    public bool canMixingFood;
 
     public List<Recipe> recipes;
+
+    private GameObject player;
+    private GameObject objMixingFood;
+
+    
+    private void Start()
+    {
+        player = GameObject.Find("Player");
+    }
+    
+    void Update()
+    {
+        MixingFood();
+    }
 
     void OnTriggerEnter(Collider other)
     {
@@ -24,33 +36,32 @@ public class FoodScript : MonoBehaviour
             other.gameObject.GetComponent<Machine>().canUseMachine = true;
             other.gameObject.GetComponent<Machine>().foodObj = this.gameObject;
             other.gameObject.GetComponent<Machine>().foodName = foodName;
-            
-// Envoie la fonction au script Machine// 
         }
-
-        if (other.CompareTag("PickUp"))
+        
+        if (other.CompareTag("Table"))
         {
-            canPose = false;
-            if (other.GetComponent<FoodScript>().foodName == foodName)
+            if (!canMixingFood)
             {
-                mixingFood = true;
-                if (Input.GetMouseButtonDown(0))
-                {
-                    print("qwack");
-                    canPose = true;
-                    Instantiate(cheese, other.transform.position, other.transform.rotation);
-                    Destroy(other);
-                    Destroy(this);
-                }
-                
+                canPose = true;
             }
         }
 
-        if (other.CompareTag("Table"))
+        if (other.CompareTag("PickUp")) // Empêche de poser l'object + Vérifie canMixingFood 
         {
-            canPose = true;
-        }
+            if (player.GetComponent<Player>().heldObj != this.gameObject) return;
+            
+            canPose = false;
 
+            if (recipes.Count == 0) return;
+
+            print(other.GetComponent<FoodScript>().foodName + "+" + recipes[0].foodToMixName);
+            
+            if (string.CompareOrdinal(other.GetComponent<FoodScript>().foodName, recipes[0].foodToMixName) != 0) return;
+
+            print("Can Mixing !");
+            canMixingFood = true;
+            objMixingFood = other.gameObject;
+        }
     }
     
     
@@ -62,20 +73,29 @@ public class FoodScript : MonoBehaviour
         }
         
         if (other.CompareTag("Machine"))
+            
         {
             other.gameObject.GetComponent<Machine>().canUseMachine = false;
         }
+    }
 
-        // if (other.CompareTag("PickUp") || other.GetComponent<FoodScript>().foodName != foodName) // erreur ici
-        
-        {
-           // mixingFood = false;
-        }
+    private void MixingFood()
+    {
+        if (!canMixingFood) return;
+
+        if (!Input.GetMouseButtonDown(0)) return;
+
+        player.gameObject.GetComponent<Player>().canGrab = true;
+        player.gameObject.GetComponent<Player>().Feedback();
+        Instantiate(recipes[0].mixingFood, objMixingFood.transform.position, objMixingFood.transform.rotation);
+        Destroy(objMixingFood.gameObject);
+        Destroy(this.gameObject);
     }
 }
 
 [Serializable] public class Recipe // Class : Stocker des variables
 {
-    public string foodName;
+    public string recipeName;
+    public string foodToMixName;
     public GameObject mixingFood;
 }
