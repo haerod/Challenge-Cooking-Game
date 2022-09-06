@@ -46,6 +46,8 @@
      <Compile Include="Assets\Scripts\Machine.cs" />
      <Compile Include="Assets\Scripts\Follow_Player.cs" />
      <Compile Include="Assets\Scripts\_Manager.cs" />
+     <Compile Include="Assets\Scripts\FoodGiver.cs" />
+     <Compile Include="Assets\Scripts\Trash.cs" />
      <Reference Include="UnityEngine">
      <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.6f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
      </Reference>

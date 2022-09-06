@@ -74,10 +74,9 @@ public class Machine : MonoBehaviour
         timeBarUI.SetActive(false);
         exclamationUI.SetActive(true);
         currentTime = 0;
-        
-        
+
+
     }
-    // A corriger : Faire instantiate une seule fois, pouvoir re-intéragir avec la machine seulement si on est proche, enlever & activer la barre de temps
     void BakeFinished()
     {
         if (!bakeFinished) return;
