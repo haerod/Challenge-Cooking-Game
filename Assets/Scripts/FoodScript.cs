@@ -12,6 +12,7 @@ public class FoodScript : MonoBehaviour
     public string foodName;
 
     public bool canMixingFood;
+    public bool checkMixingFood;
 
     public List<Recipe> recipes;
 
@@ -48,7 +49,7 @@ public class FoodScript : MonoBehaviour
 
         if (other.CompareTag("PickUp")) // Empêche de poser l'object + Vérifie canMixingFood 
         {
-            if (player.GetComponent<Player>().heldObj != this.gameObject) return;
+            if (player.GetComponent<Player>().heldObj != gameObject) return;
             
             canPose = false;
 
@@ -62,6 +63,14 @@ public class FoodScript : MonoBehaviour
             canMixingFood = true;
             objMixingFood = other.gameObject;
         }
+        if (other.CompareTag("Sender"))
+        {
+            if (!canMixingFood)
+            {
+                canPose = true;
+                _Manager.instance.objOnSender = gameObject;
+            }
+        }
     }
     
     
@@ -69,13 +78,20 @@ public class FoodScript : MonoBehaviour
     {
         if (other.CompareTag("Table"))
         {
-            canPose = false;
+            if (!canMixingFood) return;
+            
+            canMixingFood = false;
         }
         
         if (other.CompareTag("Machine"))
             
         {
             other.gameObject.GetComponent<Machine>().canUseMachine = false;
+        }
+
+        if (other.CompareTag("PickUp"))
+        {
+            canMixingFood = false;
         }
     }
 

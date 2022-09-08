@@ -2,23 +2,22 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [Header("--Player Stats--")]
     CharacterController characterController;
-
+    
+    [Header("--Player Stats--")]
     public float speed = 6.0f;
     public float jumpSpeed = 8.0f;
     public float gravity = 20.0f;
     [SerializeField] private GameObject _3DObj;
+    [SerializeField] private GameObject manager;
 
     private Vector3 moveDirection = Vector3.zero;
 
-    [Header("--Pickup Settings--")] 
-    [SerializeField] private Transform heldAnchor;
+    [Header("--Interaction Settings--")] 
+    private Transform heldAnchor;
     public bool canGrab = true;
     public GameObject heldObj;
-    private GameObject machineInFront;
-    private GameObject foodGiverInFront;
-    private GameObject trashInFront;
+    private GameObject senderInFront;
 
 
     [Header("--Physics Parameters--")] 
@@ -29,6 +28,8 @@ public class Player : MonoBehaviour
 
     void Start()
     {
+        heldAnchor = _Manager.instance.heldAnchor;
+        
         characterController = GetComponent<CharacterController>();
         
         Feedback();
@@ -37,6 +38,10 @@ public class Player : MonoBehaviour
     void Update()
     {
         Mouvement();
+        
+        if (!Physics.BoxCast(heldAnchor.position, Vector3.one/2, transform.forward,out hit, Quaternion.identity, pickupRange)) return;
+
+        if (!Input.GetMouseButtonDown(0)) return;
 
         PickUp();
 
@@ -45,6 +50,8 @@ public class Player : MonoBehaviour
         InteractionFoodGiver();
         
         InteractionTrash();
+
+        InteractionSender();
     }
 
     private void Mouvement()
@@ -64,11 +71,9 @@ public class Player : MonoBehaviour
 
     private void PickUp()
     {
-        if (!Input.GetMouseButtonDown(0)) return; 
         
-        if (heldObj == null)
+        if (!heldObj) //si il est null
         {
-            if (!Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange)) return;
 
             if (!hit.transform.CompareTag("PickUp")) return;
             
@@ -91,56 +96,33 @@ public class Player : MonoBehaviour
     }
     private void InteractionTrash()
     {
-        if (!trashInFront)
-        {
-            if (!Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange)) return;
-
             if (!hit.transform.CompareTag("Trash")) return;
-            trashInFront = hit.transform.gameObject;
-            trashInFront.GetComponent<Trash>().canUseTrash = true;
-        }
-        else
-        {
-            if (hit.transform.CompareTag("Trash")) return;
-            trashInFront.GetComponent<Trash>().canUseTrash = false;
-            trashInFront = null;
-        }
+            
+            hit.transform.gameObject.GetComponent<Trash>().UseTrash();
     }
 
     private void InteractionFoodGiver()
     {
-        if (!foodGiverInFront)
-        {
-            if (!Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange)) return;
-
             if (!hit.transform.CompareTag("FoodGiver")) return;
-            foodGiverInFront = hit.transform.gameObject;
-            foodGiverInFront.GetComponent<FoodGiver>().canUseFoodGiver = true;
-        }
-        else
-        {
-            if (hit.transform.CompareTag("FoodGiver")) return;
-            foodGiverInFront.GetComponent<FoodGiver>().canUseFoodGiver = false;
-            foodGiverInFront = null;
-        }  
+
+            hit.transform.GetComponent<FoodGiver>().GiveFood();
+
     }
 
     private void InteractionMachineFinish()
     {
-        if (machineInFront == null)
-        {
-            if (!Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange)) return;
-
             if (!hit.transform.CompareTag("Machine")) return;
-            machineInFront = hit.transform.gameObject;
-            machineInFront.GetComponent<Machine>().canGetFood = true;
-        }
-        else
-        {
-            if (hit.transform.CompareTag("Machine")) return;
-            machineInFront.GetComponent<Machine>().canGetFood = false;
-            machineInFront = null;
-        }  
+            
+            hit.transform.GetComponent<Machine>().BakeFinished();
+    }
+    
+    private void InteractionSender()
+    {
+        print(hit.transform.name);
+        if (!hit.transform.CompareTag("Sender")) return;
+        print("Etape 0");
+
+        manager.GetComponent<_Manager>().UseSender();
     }
     
     public void Feedback()
@@ -166,25 +148,32 @@ public class Player : MonoBehaviour
             FeedbackArmR.transform.localScale =  new Vector3(0.2f, 0.1f, 1.5f);
         }
     }
+
     void OnDrawGizmos() 
     {
         Gizmos.color = Color.green;
-        if (Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange) && hit.transform.CompareTag("PickUp")) // Seulement si on peut attraper l'object
+        
+        if (!heldAnchor) return;
+        if (Physics.Raycast(transform.position, heldAnchor.position, out hit, pickupRange) && hit.transform.CompareTag("PickUp")) // Seulement si on peut attraper l'object
         {
-            Gizmos.color = new Color(r: 1f, g: 0.07f, b: 0f); //Rouge = Food (PickUp) 
+            Gizmos.color = new Color(r: 1f, g: 0f, b: 0f); //Rouge = Food (PickUp) 
         }
-        if (Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange) && hit.transform.CompareTag("Machine")) // Seulement si on peut attraper l'object
+        if (Physics.Raycast(transform.position, heldAnchor.position, out hit, pickupRange) && hit.transform.CompareTag("Machine")) // Seulement si on peut attraper l'object
         {
             Gizmos.color = new Color(r: 0f, g: 0.00f, b: 1f); //bleu = Machine  
         }
-        if (Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange) && hit.transform.CompareTag("FoodGiver")) // Seulement si on peut attraper l'object
+        if (Physics.Raycast(transform.position, heldAnchor.position, out hit, pickupRange) && hit.transform.CompareTag("FoodGiver")) // Seulement si on peut attraper l'object
         {
             Gizmos.color = new Color(r: 0.5f, g: 0.3f, b: 1f); //Violet = FoodGiver 
         }
-        if (Physics.Raycast(transform.position, heldAnchor.transform.position, out hit, pickupRange) && hit.transform.CompareTag("Trash")) // Seulement si on peut attraper l'object
+        if (Physics.Raycast(transform.position, heldAnchor.position, out hit, pickupRange) && hit.transform.CompareTag("Trash")) // Seulement si on peut attraper l'object
         {
             Gizmos.color = new Color(r: 1f, g: 1f, b: 0f); //jaune = Trash
         }
-        Gizmos.DrawLine(transform.position, heldAnchor.transform.position);
+        if (Physics.Raycast(transform.position, heldAnchor.position, out hit, pickupRange) && hit.transform.CompareTag("Sender")) // Seulement si on peut attraper l'object
+        {
+            Gizmos.color = Color.magenta; //magenta = sender 
+        }
+        Gizmos.DrawLine(transform.position, heldAnchor.position);
     }
 }

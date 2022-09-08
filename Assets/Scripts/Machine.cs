@@ -17,7 +17,7 @@ public class Machine : MonoBehaviour
     [HideInInspector] public string foodName;
     [HideInInspector] public GameObject foodObj;
     private GameObject heldAnchor; // Ancre du Player
-    private GameObject player;
+    private Player player;
     
     //Baked Start
     private float currentTime = 0f;
@@ -31,7 +31,7 @@ public class Machine : MonoBehaviour
     
     void Start()
     {
-        player = GameObject.Find("Player");
+        player = _Manager.instance.player;
         heldAnchor = GameObject.Find("Held_Anchor");
         timeBarUI.SetActive(false);
         exclamationUI.SetActive(false);
@@ -42,7 +42,6 @@ public class Machine : MonoBehaviour
     {
         BakedMachine();
         BakedStart();
-        BakeFinished();
     }
 
     private void BakedMachine()
@@ -55,8 +54,8 @@ public class Machine : MonoBehaviour
         canBake = true;
         foodIsCreated = false;
         canUseMachine = false;
-        player.gameObject.GetComponent<Player>().canGrab = true;
-        player.gameObject.GetComponent<Player>().Feedback();
+        player.canGrab = true;
+        player.Feedback();
         timeBarUI.SetActive(true);
     }
 
@@ -77,7 +76,7 @@ public class Machine : MonoBehaviour
 
 
     }
-    void BakeFinished()
+    public void BakeFinished()
     {
         if (!bakeFinished) return;
         
@@ -85,17 +84,12 @@ public class Machine : MonoBehaviour
 
         if (foodIsCreated) return; // Passe seulement si l'objet n'a pas été créer
 
-        if (!canGetFood) return;
-        
-        if (!Input.GetMouseButtonDown(0)) return;
-        
-        
         foodIsCreated = true;
         var newBakedObj = Instantiate(foodBaked, heldAnchor.transform.position, heldAnchor.transform.rotation);
         newBakedObj.transform.parent = heldAnchor.transform;
-        player.gameObject.GetComponent<Player>().heldObj = newBakedObj;
-        player.gameObject.GetComponent<Player>().canGrab = false;
-        player.gameObject.GetComponent<Player>().Feedback();
+        player.heldObj = newBakedObj;
+        player.canGrab = false;
+        player.Feedback();
         exclamationUI.SetActive(false);
         currentTime = 0;
         bakeFinished = false;

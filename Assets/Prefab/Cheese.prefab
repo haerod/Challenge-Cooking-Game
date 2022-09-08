@@ -162,7 +162,7 @@ MonoBehaviour:
   canMixingFood: 0
   recipes:
   - recipeName: Cheese Bread
-    foodToMixName: Bread
+    foodToMixName: Toasted_Bread
     mixingFood: {fileID: 5253754194100674257, guid: 10b5b8d313996f747aaa9e08072067f6, type: 3}
 --- !u!1 &8490957979258102975
 GameObject:

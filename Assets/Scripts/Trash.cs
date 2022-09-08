@@ -4,32 +4,13 @@ using UnityEngine;
 
 public class Trash : MonoBehaviour
 {
-    public bool canUseTrash;
-    private GameObject player;
-    
-    // Start is called before the first frame update
-    void Start()
+    public void UseTrash()
     {
-        player = GameObject.Find("Player");
-    }
+        Player player = _Manager.instance.player;        
+        if (!player.heldObj) return; //si le player tiens un object 
 
-    // Update is called once per frame
-    void Update()
-    {
-        UseTrash();
-    }
-
-    void UseTrash()
-    {
-        if (!canUseTrash) return;
-
-        if (!player.gameObject.GetComponent<Player>().heldObj) return; //si le player tiens un object 
-        
-        if (!Input.GetMouseButtonDown(0)) return;
-
-        Destroy(player.gameObject.GetComponent<Player>().heldObj);
-        player.gameObject.GetComponent<Player>().canGrab = true;
-        player.gameObject.GetComponent<Player>().Feedback();
-        canUseTrash = false;
+        Destroy(player.heldObj);
+        player.canGrab = true;
+        player.Feedback();
     }
 }

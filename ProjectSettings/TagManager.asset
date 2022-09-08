@@ -9,6 +9,7 @@ TagManager:
   - Machine
   - FoodGiver
   - Trash
+  - Sender
   layers:
   - Default
   - TransparentFX
