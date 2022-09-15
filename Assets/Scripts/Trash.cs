@@ -11,6 +11,6 @@ public class Trash : MonoBehaviour
 
         Destroy(player.heldObj);
         player.canGrab = true;
-        player.Feedback();
+        _Manager.instance.audioSourceEffect.PlayOneShot(_Manager.instance.fbTrash, _Manager.instance.effectVolume);      
     }
 }

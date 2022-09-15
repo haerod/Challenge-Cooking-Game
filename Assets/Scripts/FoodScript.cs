@@ -5,24 +5,23 @@ using UnityEngine;
 
 public class FoodScript : MonoBehaviour
 {
-    [Header("--CanPose--")] 
-    public bool canPose;
+    [HideInInspector] public bool canPose;
 
-    [Header("--FoodName--")]
+    [Header("------FoodName------")]
     public string foodName;
 
-    public bool canMixingFood;
-    public bool checkMixingFood;
-
+    [Header("--List of possible recipes with this ingredient--")]
     public List<Recipe> recipes;
-
-    private GameObject player;
+    
+    private bool canMixingFood;
+    private bool checkMixingFood;
+    private Player player;
     private GameObject objMixingFood;
 
     
     private void Start()
     {
-        player = GameObject.Find("Player");
+        player = _Manager.instance.player;
     }
     
     void Update()
@@ -49,14 +48,12 @@ public class FoodScript : MonoBehaviour
 
         if (other.CompareTag("PickUp")) // Empêche de poser l'object + Vérifie canMixingFood 
         {
-            if (player.GetComponent<Player>().heldObj != gameObject) return;
+            if (player.heldObj != gameObject) return;
             
             canPose = false;
 
             if (recipes.Count == 0) return;
 
-            print(other.GetComponent<FoodScript>().foodName + "+" + recipes[0].foodToMixName);
-            
             if (string.CompareOrdinal(other.GetComponent<FoodScript>().foodName, recipes[0].foodToMixName) != 0) return;
 
             print("Can Mixing !");
@@ -65,6 +62,7 @@ public class FoodScript : MonoBehaviour
         }
         if (other.CompareTag("Sender"))
         {
+            print("sender close");
             if (!canMixingFood)
             {
                 canPose = true;
@@ -78,9 +76,10 @@ public class FoodScript : MonoBehaviour
     {
         if (other.CompareTag("Table"))
         {
-            if (!canMixingFood) return;
+            if (canMixingFood) return;
             
             canMixingFood = false;
+            canPose = false;
         }
         
         if (other.CompareTag("Machine"))
@@ -102,7 +101,7 @@ public class FoodScript : MonoBehaviour
         if (!Input.GetMouseButtonDown(0)) return;
 
         player.gameObject.GetComponent<Player>().canGrab = true;
-        player.gameObject.GetComponent<Player>().Feedback();
+        _Manager.instance.audioSourceEffect.PlayOneShot(_Manager.instance.fbMixing, _Manager.instance.effectVolume); 
         Instantiate(recipes[0].mixingFood, objMixingFood.transform.position, objMixingFood.transform.rotation);
         Destroy(objMixingFood.gameObject);
         Destroy(this.gameObject);

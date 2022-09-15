@@ -1,57 +1,48 @@
+using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+
 
 public class Player : MonoBehaviour
 {
     CharacterController characterController;
     
-    [Header("--Player Stats--")]
-    public float speed = 6.0f;
-    public float jumpSpeed = 8.0f;
-    public float gravity = 20.0f;
-    [SerializeField] private GameObject _3DObj;
-    [SerializeField] private GameObject manager;
-
+    private float speed;
+    [HideInInspector] public float jumpSpeed = 8.0f;
+    [HideInInspector] public float gravity = 20.0f;
     private Vector3 moveDirection = Vector3.zero;
 
-    [Header("--Interaction Settings--")] 
     private Transform heldAnchor;
-    public bool canGrab = true;
-    public GameObject heldObj;
-    private GameObject senderInFront;
+    [HideInInspector] public bool canGrab = true;
+    [HideInInspector] public GameObject heldObj;
+    private GameObject tagObj;
 
 
     [Header("--Physics Parameters--")] 
-    [SerializeField] private float pickupRange = 2.0f;
-    private RaycastHit hit;
-    
-    
+    [HideInInspector] public List<Collider> col;
+    public LayerMask interactibleMask;
+
 
     void Start()
     {
         heldAnchor = _Manager.instance.heldAnchor;
         
         characterController = GetComponent<CharacterController>();
-        
-        Feedback();
+
+        speed = _Manager.instance.playerSpeed;
     }
 
     void Update()
     {
         Mouvement();
         
-        if (!Physics.BoxCast(heldAnchor.position, Vector3.one/2, transform.forward,out hit, Quaternion.identity, pickupRange)) return;
-
         if (!Input.GetMouseButtonDown(0)) return;
 
-        PickUp();
-
-        InteractionMachineFinish();
-
-        InteractionFoodGiver();
+        col = Physics.OverlapSphere(heldAnchor.position, .5f, interactibleMask).ToList();
         
-        InteractionTrash();
-
-        InteractionSender();
+        if (col.Count == 0) return;
+        
+        Interact();
     }
 
     private void Mouvement()
@@ -63,21 +54,43 @@ public class Player : MonoBehaviour
             moveDirection *= speed;
            
            float angle = Mathf.Atan2(Input.GetAxis("Horizontal"),Input.GetAxis("Vertical")) * Mathf.Rad2Deg; // Fait rotate le player
-           _3DObj.transform.rotation =Quaternion.Euler(new Vector3(0, angle, 0));
+           transform.rotation =Quaternion.Euler(new Vector3(0, angle, 0));
         }
         moveDirection.y -= gravity * Time.deltaTime;
         characterController.Move(moveDirection * Time.deltaTime);    
     }
 
+    private void Interact()
+    {
+        if (IsContainingInteractible("Trash"))
+        {
+            InteractionTrash();
+        }
+        else if (IsContainingInteractible("Machine"))
+        {
+            InteractionMachineFinish();
+
+        }
+        else if (IsContainingInteractible("FoodGiver"))
+        {
+            InteractionFoodGiver();
+        }
+        else if (IsContainingInteractible("Sender"))
+        {
+            InteractionSender();
+        }
+        if (IsContainingInteractible("PickUp"))
+        {
+            PickUp();
+        }
+    }
     private void PickUp()
     {
         
         if (!heldObj) //si il est null
         {
 
-            if (!hit.transform.CompareTag("PickUp")) return;
-            
-            heldObj = hit.transform.gameObject;
+            heldObj = tagObj;
             heldObj.transform.position = heldAnchor.position;
             heldObj.transform.parent = heldAnchor;
             canGrab = false;
@@ -96,84 +109,56 @@ public class Player : MonoBehaviour
     }
     private void InteractionTrash()
     {
-            if (!hit.transform.CompareTag("Trash")) return;
-            
-            hit.transform.gameObject.GetComponent<Trash>().UseTrash();
+            tagObj.GetComponent<Trash>().UseTrash();
     }
 
     private void InteractionFoodGiver()
     {
-            if (!hit.transform.CompareTag("FoodGiver")) return;
-
-            hit.transform.GetComponent<FoodGiver>().GiveFood();
-
+            tagObj.GetComponent<FoodGiver>().GiveFood();
     }
 
     private void InteractionMachineFinish()
     {
-            if (!hit.transform.CompareTag("Machine")) return;
-            
-            hit.transform.GetComponent<Machine>().BakeFinished();
+           tagObj.GetComponent<Machine>().BakeFinished();
     }
     
     private void InteractionSender()
     {
-        print(hit.transform.name);
-        if (!hit.transform.CompareTag("Sender")) return;
-        print("Etape 0");
 
-        manager.GetComponent<_Manager>().UseSender();
+        _Manager.instance.UseSender();
     }
     
     public void Feedback()
     {
-        GameObject ArmL = GameObject.Find("Arm_L");
-        GameObject ArmR = GameObject.Find("Arm_R");
-        GameObject FeedbackArmL = GameObject.Find("Feedback_Arm_R");
-        GameObject FeedbackArmR = GameObject.Find("Feedback_Arm_L");
 
         if (canGrab)
         {
-            ArmL.transform.localScale =  new Vector3(0.2f, 0.6f, 0.2f);
-            ArmR.transform.localScale =  new Vector3(0.2f, 0.6f, 0.2f);
-            FeedbackArmL.transform.localScale = new Vector3(0f, 0f, 0f);
-            FeedbackArmR.transform.localScale = new Vector3(0f, 0f, 0f);
-            
+            _Manager.instance.audioSourceEffect.PlayOneShot(_Manager.instance.fbPose, _Manager.instance.effectVolume); 
         }
         else
         {
-            ArmL.transform.localScale =  new Vector3(0f, 0f, 0f);
-            ArmR.transform.localScale =  new Vector3(0f, 0f, 0f);
-            FeedbackArmL.transform.localScale =  new Vector3(0.2f, 0.1f, 1.5f);
-            FeedbackArmR.transform.localScale =  new Vector3(0.2f, 0.1f, 1.5f);
+            _Manager.instance.audioSourceEffect.PlayOneShot(_Manager.instance.fbGrab, _Manager.instance.effectVolume); 
         }
     }
 
+    private bool IsContainingInteractible(string tag)
+    {
+        foreach (Collider c  in col)
+        {
+            if (c.CompareTag(tag))
+            {
+                tagObj = c.gameObject; 
+                return true;
+            }
+        }
+        return false;
+    }
     void OnDrawGizmos() 
     {
-        Gizmos.color = Color.green;
         
         if (!heldAnchor) return;
-        if (Physics.Raycast(transform.position, heldAnchor.position, out hit, pickupRange) && hit.transform.CompareTag("PickUp")) // Seulement si on peut attraper l'object
-        {
-            Gizmos.color = new Color(r: 1f, g: 0f, b: 0f); //Rouge = Food (PickUp) 
-        }
-        if (Physics.Raycast(transform.position, heldAnchor.position, out hit, pickupRange) && hit.transform.CompareTag("Machine")) // Seulement si on peut attraper l'object
-        {
-            Gizmos.color = new Color(r: 0f, g: 0.00f, b: 1f); //bleu = Machine  
-        }
-        if (Physics.Raycast(transform.position, heldAnchor.position, out hit, pickupRange) && hit.transform.CompareTag("FoodGiver")) // Seulement si on peut attraper l'object
-        {
-            Gizmos.color = new Color(r: 0.5f, g: 0.3f, b: 1f); //Violet = FoodGiver 
-        }
-        if (Physics.Raycast(transform.position, heldAnchor.position, out hit, pickupRange) && hit.transform.CompareTag("Trash")) // Seulement si on peut attraper l'object
-        {
-            Gizmos.color = new Color(r: 1f, g: 1f, b: 0f); //jaune = Trash
-        }
-        if (Physics.Raycast(transform.position, heldAnchor.position, out hit, pickupRange) && hit.transform.CompareTag("Sender")) // Seulement si on peut attraper l'object
-        {
-            Gizmos.color = Color.magenta; //magenta = sender 
-        }
-        Gizmos.DrawLine(transform.position, heldAnchor.position);
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere (heldAnchor.position, .5f);
     }
 }

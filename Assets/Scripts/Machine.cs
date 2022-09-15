@@ -9,11 +9,11 @@ public class Machine : MonoBehaviour
     [SerializeField] private GameObject foodBaked;
     public float timeBaked;
     
-    [Header("-------------------Scripts-------------------")] // Verification Var // 
+    // Verification Var // 
     private bool canBake;
     private bool bakeFinished;
-    public bool canUseMachine;
-    public bool canGetFood;
+    [HideInInspector] public bool canUseMachine;
+    [HideInInspector] public bool canGetFood;
     [HideInInspector] public string foodName;
     [HideInInspector] public GameObject foodObj;
     private GameObject heldAnchor; // Ancre du Player

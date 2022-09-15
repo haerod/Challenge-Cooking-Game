@@ -1,34 +1,62 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class _Manager : MonoBehaviour
 {
     public static _Manager instance;
     
+    [Header("-----Player Stat----")] 
+    [Range(0, 12)]
+    public float playerSpeed = 6.0f;
+    
     [Header("--Timer Setting--")]
+    [Tooltip("Time in secondes")]
     public float timeRemaining = 10;
-    public bool timerIsRunning = false;
+    private bool timerIsRunning = false;
+    [Tooltip("Game Object where the text is displayed")]
     public Text timeText;
 
-    [Header("--Sender Setting--")] 
-
-    public GameObject imgPlat1;
-    public GameObject imgPlat2;
-    public GameObject imgPlat3;
-    public GameObject imgPlat4;
-    public GameObject imgPlat5;
-
-    private int numberOfPlatLeft;
+    [Header("--Sender Setting--")]
+    [HideInInspector] 
     public GameObject objOnSender;
 
     public Player player;
     public Transform heldAnchor;
     
+    [Header("-----Lists of all the plates to win----")] 
     public List<ListPlat> listOfPlats;
+    private bool win;
+    private bool loose;
+    
+    
+    [Header("-----UI-----")]
+
+    public Animator blackScreen;
+    public Sprite defaultImg;
+
+    [Header("-----Audio----")] 
+    public AudioSource audioSourceEffect;
+    public AudioSource audioSourceMusic;
+    public AudioClip musicInGame;
+    public AudioClip fbGrab;
+    public AudioClip fbPose;
+    public AudioClip fbMixing;
+    public AudioClip fbNoMixing;
+    public AudioClip fbTrash;
+    public AudioClip fbSenderFalse;
+    public AudioClip fbSenderTrue;
+    public AudioClip fbWin;
+    public AudioClip fbLoose;
+    [Range(0, 1)]
+    public float effectVolume = 0.5f;
+    [Range(0, 1)]
+    public float musicVolume = 0.5f;
+
+    
+    
 
     private void Awake()
     {
@@ -47,11 +75,18 @@ public class _Manager : MonoBehaviour
         timerIsRunning = true;
         
         SetUpUI();
+        
+        Cursor.visible = false;
+        
+        audioSourceMusic.PlayOneShot(musicInGame, musicVolume);
     }
     
     void Update()
     {
         TimerRunning();
+        
+        LooseBackMenu();
+        WinBackMenu();
     }
 
     void TimerRunning()
@@ -64,9 +99,12 @@ public class _Manager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Event Loose");
+            audioSourceEffect.PlayOneShot(fbLoose, effectVolume); 
+
+            loose = true;
             timeRemaining = 0;
             timerIsRunning = false;
+            blackScreen.SetBool("looseAnim", true);
         }
     }
     void DisplayTime(float timeToDisplay)
@@ -83,138 +121,103 @@ public class _Manager : MonoBehaviour
         if (!player.heldObj) return; //si le player tiens un object 
         
         player.canGrab = true;
-        player.Feedback();
-        Debug.Log(listOfPlats.First().foodName);
-        Debug.Log(objOnSender.GetComponent<FoodScript>().foodName);
-
-        if (listOfPlats.First().foodName == objOnSender.GetComponent<FoodScript>().foodName)
+        
+        foreach (var allFoodName in listOfPlats) // Verification de si l'objet posés est l'un de ceux dans la listes des plats
         {
-            print("GG");
+            Debug.Log(allFoodName.foodName + " & " + objOnSender.GetComponent<FoodScript>().foodName);
+            if (allFoodName.foodName == objOnSender.GetComponent<FoodScript>().foodName)
+            {
+                print("Food Send !");
+                Destroy(objOnSender);
+                allFoodName.foodImgUI.transform.GetChild(0).GetComponent<Image>().sprite = defaultImg;
+                listOfPlats.Remove(allFoodName);
+                SendPlat();
+            }
         }
+        audioSourceEffect.PlayOneShot(fbSenderFalse, effectVolume); 
     }
 
     void SetUpUI()
     {
-
         if (listOfPlats.Count == 0) // Minimum 1 Plat
         {
             Debug.LogError("Il faut au minimum <color=#FF0000><b>un plat</b></color> pour lancer le jeu", gameObject);
             return;
         }
-        if (listOfPlats.Count > 5) // Maximum 5 Plat
-        {
-            Debug.LogError("Vous avez atteint le maximum de <color=#FF0000><b>5 plats</b></color>. Supprimer les plats de trop pour continuer", gameObject);
-            return;
-        }
         
-        if (listOfPlats.Count == 1)
+        foreach (ListPlat currentListOfPlats in listOfPlats) // SetUP des Images & verifs aucun paramètres est vide
         {
-            if (string.IsNullOrEmpty(listOfPlats[0].foodName) || listOfPlats[0].foodSprite == null)
+            if (string.IsNullOrEmpty(currentListOfPlats.foodName) || !currentListOfPlats.foodSprite || !currentListOfPlats.foodImgUI)
             {
                 ErrorEmptyCase();
                 return;
-            }
-            imgPlat1.SetActive(true);
-            imgPlat1.GetComponent<Image>().sprite = listOfPlats[0].foodSprite;
-            
-            imgPlat2.SetActive(false);
-            imgPlat3.SetActive(false);
-            imgPlat4.SetActive(false);
-            imgPlat5.SetActive(false);
 
-            numberOfPlatLeft = 1;
-        }
-
-        if (listOfPlats.Count == 2)
-        {
-            if (string.IsNullOrEmpty(listOfPlats[1].foodName) || listOfPlats[1].foodSprite == null)
-            {
-                ErrorEmptyCase();
-                return;
             }
-            imgPlat1.SetActive(true);
-            imgPlat1.GetComponent<Image>().sprite = listOfPlats[0].foodSprite;
-            imgPlat2.SetActive(true);
-            imgPlat2.GetComponent<Image>().sprite = listOfPlats[1].foodSprite;
-            
-            imgPlat3.SetActive(false);
-            imgPlat4.SetActive(false);
-            imgPlat5.SetActive(false);
-            
-            numberOfPlatLeft = 2;
+            currentListOfPlats.foodImgUI.transform.GetChild(0).GetComponent<Image>().sprite = currentListOfPlats.foodSprite;
         }
-        
-        if (listOfPlats.Count == 3)
-        {
-            if (string.IsNullOrEmpty(listOfPlats[2].foodName) || listOfPlats[2].foodSprite == null)
-            {
-                ErrorEmptyCase();
-                return;
-            }
-            imgPlat1.SetActive(true);
-            imgPlat1.GetComponent<Image>().sprite = listOfPlats[0].foodSprite;
-            imgPlat2.SetActive(true);
-            imgPlat2.GetComponent<Image>().sprite = listOfPlats[1].foodSprite;
-            imgPlat3.SetActive(true);
-            imgPlat3.GetComponent<Image>().sprite = listOfPlats[2].foodSprite;
-            
-            imgPlat4.SetActive(false);
-            imgPlat5.SetActive(false);
-            
-            numberOfPlatLeft = 3;
-        }
-        
-        if (listOfPlats.Count == 4)
-        {
-            if (string.IsNullOrEmpty(listOfPlats[3].foodName) || listOfPlats[3].foodSprite == null)
-            {
-                ErrorEmptyCase();
-                return;
-            }
-            imgPlat1.SetActive(true);
-            imgPlat1.GetComponent<Image>().sprite = listOfPlats[0].foodSprite;
-            imgPlat2.SetActive(true);
-            imgPlat2.GetComponent<Image>().sprite = listOfPlats[1].foodSprite;
-            imgPlat3.SetActive(true);
-            imgPlat3.GetComponent<Image>().sprite = listOfPlats[2].foodSprite;
-            imgPlat4.SetActive(true);
-            imgPlat4.GetComponent<Image>().sprite = listOfPlats[3].foodSprite;
-            
-            imgPlat5.SetActive(false); 
-            numberOfPlatLeft = 4;
-        }
-        
-        if (listOfPlats.Count == 5)
-        {
-            if (string.IsNullOrEmpty(listOfPlats[4].foodName) || listOfPlats[4].foodSprite == null)
-            {
-                ErrorEmptyCase();
-                return;
-            }
-            imgPlat1.SetActive(true);
-            imgPlat1.GetComponent<Image>().sprite = listOfPlats[0].foodSprite;
-            imgPlat2.SetActive(true);
-            imgPlat2.GetComponent<Image>().sprite = listOfPlats[1].foodSprite;
-            imgPlat3.SetActive(true);
-            imgPlat3.GetComponent<Image>().sprite = listOfPlats[2].foodSprite;
-            imgPlat4.SetActive(true);
-            imgPlat4.GetComponent<Image>().sprite = listOfPlats[3].foodSprite;
-            imgPlat5.SetActive(true);
-            imgPlat5.GetComponent<Image>().sprite = listOfPlats[3].foodSprite;
-            
-            numberOfPlatLeft = 5;
-        }
-        
     }
 
     void ErrorEmptyCase()
     {
-        Debug.LogError("La case <color=#FF0000><b>food Name </b></color> ou <color=#FF0000><b>food sprite </b></color> de l'object <b>_Manager</b> est vide, cela ne peut fonctionner que si ces deux conditions sont rempli", gameObject);
+        Debug.LogError("La case <color=#FF0000><b>food Name </b></color>, <color=#FF0000><b>food sprite </b></color> ou <color=#FF0000><b>food Img UI </b></color>de l'object <b>_Manager</b> est vide, cela ne peut fonctionner que si ces trois conditions sont rempli", gameObject);
+    }
+    
+    void SendPlat()
+    {
+        if (listOfPlats.Count != 0)
+        {
+            audioSourceEffect.PlayOneShot(fbSenderTrue, effectVolume); 
+        }
+        if (listOfPlats.Count != 0) return;
+        
+        Debug.Log("GG !");
+        timerIsRunning = false;
+        win = true;
+        audioSourceEffect.PlayOneShot(fbWin, effectVolume); 
+        blackScreen.SetBool("winAnim", true);
+    }
+
+    void WinBackMenu()
+    {
+        if (!win) return;
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            blackScreen.SetBool("winAnimOver", true);
+            audioSourceEffect.PlayOneShot(fbWin, effectVolume); 
+            if (blackScreen.GetCurrentAnimatorStateInfo(0).IsName("Black_Screen_Win_Over"))
+            {
+            }
+            else
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
+        }
+    }
+    void LooseBackMenu()
+    {
+        if (!loose) return;
+        
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            blackScreen.SetBool("looseAnimOver", true);
+            if (blackScreen.GetCurrentAnimatorStateInfo(0).IsName("Black_Screen_Win_Over"))
+            {
+            }
+            else
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
+        }
     }
 }
+
+
 
 [Serializable] public class ListPlat // Class : Stocker des variables
 {
     public string foodName;
     public Sprite foodSprite;
+    public Canvas foodImgUI;
 }
