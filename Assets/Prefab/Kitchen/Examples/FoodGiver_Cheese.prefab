@@ -849,3 +849,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   foodObjToGive: {fileID: 6089731633953596431, guid: 906dfad902043714fa8e0cae6a1b5657, type: 3}
+  audioFoodGiver: {fileID: 8300000, guid: e9a9540bd72084043b528b27d64754ce, type: 3}

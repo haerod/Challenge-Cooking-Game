@@ -17,6 +17,7 @@ public class FoodScript : MonoBehaviour
     private bool checkMixingFood;
     private Player player;
     private GameObject objMixingFood;
+    private GameObject objToInstanceMix;
 
     
     private void Start()
@@ -54,11 +55,21 @@ public class FoodScript : MonoBehaviour
 
             if (recipes.Count == 0) return;
 
-            if (string.CompareOrdinal(other.GetComponent<FoodScript>().foodName, recipes[0].foodToMixName) != 0) return;
+            //if (string.CompareOrdinal(other.GetComponent<FoodScript>().foodName, recipes[1].foodToMixName) != 0) return;
+            
+            foreach (var allRecipeName in recipes) // Verification de si l'objet posés est l'un de ceux dans la listes des plats
+            {
+                if (string.CompareOrdinal(other.GetComponent<FoodScript>().foodName, allRecipeName.foodToMixName) == 0)
+                {
+                    print("Can Mixing !");
+                    canMixingFood = true;
+                    objMixingFood = other.gameObject;
+                    objToInstanceMix = allRecipeName.mixingFood;
+                }
+            }
+            
 
-            print("Can Mixing !");
-            canMixingFood = true;
-            objMixingFood = other.gameObject;
+            
         }
         if (other.CompareTag("Sender"))
         {
@@ -102,7 +113,7 @@ public class FoodScript : MonoBehaviour
 
         player.gameObject.GetComponent<Player>().canGrab = true;
         _Manager.instance.audioSourceEffect.PlayOneShot(_Manager.instance.fbMixing, _Manager.instance.effectVolume); 
-        Instantiate(recipes[0].mixingFood, objMixingFood.transform.position, objMixingFood.transform.rotation);
+        Instantiate(objToInstanceMix, objMixingFood.transform.position, objMixingFood.transform.rotation);
         Destroy(objMixingFood.gameObject);
         Destroy(this.gameObject);
     }
@@ -110,7 +121,10 @@ public class FoodScript : MonoBehaviour
 
 [Serializable] public class Recipe // Class : Stocker des variables
 {
+    [Tooltip("Name of the recipe you want to create")]
     public string recipeName;
+    [Tooltip("The exact name of the food to create the recipe")]
     public string foodToMixName;
+    [Tooltip("The Prefab of the new recipe")]
     public GameObject mixingFood;
 }

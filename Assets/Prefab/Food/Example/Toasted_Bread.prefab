@@ -178,7 +178,7 @@ MonoBehaviour:
   canPose: 0
   foodName: Toasted_Bread
   recipes:
-  - recipeName: Toasted Cheese Bread
+  - recipeName: Toasted_Cheese_Bread
     foodToMixName: Cheese
     mixingFood: {fileID: 5253754194100674257, guid: 10b5b8d313996f747aaa9e08072067f6, type: 3}
 --- !u!1 &7342049721014489448

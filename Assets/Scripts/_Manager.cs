@@ -9,54 +9,53 @@ public class _Manager : MonoBehaviour
     public static _Manager instance;
     
     [Header("-----Player Stat----")] 
+    [Tooltip("6 is the default speed")]
     [Range(0, 12)]
     public float playerSpeed = 6.0f;
     
     [Header("--Timer Setting--")]
     [Tooltip("Time in secondes")]
     public float timeRemaining = 10;
-    private bool timerIsRunning = false;
-    [Tooltip("Game Object where the text is displayed")]
-    public Text timeText;
-
-    [Header("--Sender Setting--")]
-    [HideInInspector] 
-    public GameObject objOnSender;
-
-    public Player player;
-    public Transform heldAnchor;
-    
-    [Header("-----Lists of all the plates to win----")] 
-    public List<ListPlat> listOfPlats;
-    private bool win;
-    private bool loose;
-    
     
     [Header("-----UI-----")]
-
-    public Animator blackScreen;
+    [Tooltip("Default screen image after a plates is completed")]
     public Sprite defaultImg;
 
     [Header("-----Audio----")] 
-    public AudioSource audioSourceEffect;
-    public AudioSource audioSourceMusic;
+
     public AudioClip musicInGame;
     public AudioClip fbGrab;
     public AudioClip fbPose;
     public AudioClip fbMixing;
-    public AudioClip fbNoMixing;
     public AudioClip fbTrash;
     public AudioClip fbSenderFalse;
     public AudioClip fbSenderTrue;
     public AudioClip fbWin;
     public AudioClip fbLoose;
+    
+    [Header("-----Audio Volume----")] 
     [Range(0, 1)]
     public float effectVolume = 0.5f;
     [Range(0, 1)]
     public float musicVolume = 0.5f;
+    
+    [Header("-----Lists of all the plates to win----")] 
+    public List<ListPlat> listOfPlats;
+    
+    [Header("-----Don't Touch----")] 
+    [Tooltip("Game Object where the text is displayed")]
+    public Text timeText;
+    [HideInInspector] 
+    public GameObject objOnSender;
+    public Player player;
+    public Transform heldAnchor;
+    public Animator blackScreen;
+    public AudioSource audioSourceEffect;
+    public AudioSource audioSourceMusic;
+    private bool win;
+    private bool loose;
+    private bool timerIsRunning = false;
 
-    
-    
 
     private void Awake()
     {
@@ -134,7 +133,8 @@ public class _Manager : MonoBehaviour
                 SendPlat();
             }
         }
-        audioSourceEffect.PlayOneShot(fbSenderFalse, effectVolume); 
+        audioSourceEffect.PlayOneShot(fbSenderFalse, effectVolume);
+        Destroy(objOnSender);
     }
 
     void SetUpUI()

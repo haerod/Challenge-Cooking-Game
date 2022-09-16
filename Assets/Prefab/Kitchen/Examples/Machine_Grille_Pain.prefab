@@ -891,6 +891,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   foodToBakeName: Bread
   foodBaked: {fileID: 2880001242806686379, guid: 9376760e272ed9e47af86ffb591c59d1, type: 3}
+  audioMachineOver: {fileID: 8300000, guid: a740d69785d50cc4e9b3204061545556, type: 3}
   timeBaked: 2
   canUseMachine: 0
   canGetFood: 0

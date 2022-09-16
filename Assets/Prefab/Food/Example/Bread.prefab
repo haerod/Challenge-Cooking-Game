@@ -61,7 +61,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canPose: 0
   foodName: Bread
-  recipes: []
+  recipes:
+  - recipeName: Cheese_Bread
+    foodToMixName: Cheese
+    mixingFood: {fileID: 6127686020259260754, guid: 4cf16451800c81341bd4bfc63ae7e009, type: 3}
 --- !u!1 &4577719923275796881
 GameObject:
   m_ObjectHideFlags: 0

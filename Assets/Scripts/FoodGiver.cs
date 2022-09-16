@@ -2,8 +2,12 @@ using UnityEngine;
 
 public class FoodGiver : MonoBehaviour
 {
-
+    [Header("-----Food Giver parameter-----")]
+    [Tooltip("Prefab food to give to the player")]
     public GameObject foodObjToGive;
+    [Header("-----Audio Feedback-----")]
+    [Tooltip("Audio feedback when the interact with FoodGiver")]
+    [SerializeField] private AudioClip audioFoodGiver;
 
     public void GiveFood()
     {
@@ -16,7 +20,7 @@ public class FoodGiver : MonoBehaviour
         newFoodObj.transform.parent = heldObject;
         player.heldObj = newFoodObj;
         player.canGrab = false;
-        player.Feedback();
+        _Manager.instance.audioSourceEffect.PlayOneShot(audioFoodGiver, _Manager.instance.effectVolume);
     }
     
 }

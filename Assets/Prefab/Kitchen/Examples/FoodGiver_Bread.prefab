@@ -729,7 +729,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5812299752128758804}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 4.037, y: 0.64, z: -0.04700005}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -764,6 +764,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   foodObjToGive: {fileID: 4577719923241768189, guid: f84d9613981b16b4dad514a1c1a396dc, type: 3}
+  audioFoodGiver: {fileID: 8300000, guid: e9a9540bd72084043b528b27d64754ce, type: 3}
 --- !u!1 &5812299752270751204
 GameObject:
   m_ObjectHideFlags: 0

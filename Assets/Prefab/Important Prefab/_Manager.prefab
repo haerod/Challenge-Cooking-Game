@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6277312606001093541
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6277312606001093547}
+  - component: {fileID: 6277312606001093540}
+  m_Layer: 0
+  m_Name: _Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6277312606001093547
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6277312606001093541}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.15722606, y: 0.79226243, z: -0.8553173}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6277312606001093540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6277312606001093541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbd7eaef207587e42a085a1045b6d59d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerSpeed: 6
+  timeRemaining: 60
+  timeText: {fileID: 0}
+  objOnSender: {fileID: 0}
+  player: {fileID: 0}
+  heldAnchor: {fileID: 0}
+  listOfPlats:
+  - foodName: Cheese
+    foodSprite: {fileID: 21300000, guid: a064d90894a14c94ebb834bce82e911a, type: 3}
+    foodImgUI: {fileID: 0}
+  - foodName: Toasted_Cheese_Bread
+    foodSprite: {fileID: 21300000, guid: 0d230d73f2b062e488f9c6592d6b42b1, type: 3}
+    foodImgUI: {fileID: 0}
+  blackScreen: {fileID: 0}
+  defaultImg: {fileID: 21300000, guid: 53aa6ede7238e1941afbf4950e2611d6, type: 3}
+  audioSourceEffect: {fileID: 0}
+  audioSourceMusic: {fileID: 0}
+  musicInGame: {fileID: 8300000, guid: 1274af0130989a341bb07c3bec6a7f36, type: 3}
+  fbGrab: {fileID: 8300000, guid: 7b76a923fd2cdc749b1adb3158f20972, type: 3}
+  fbPose: {fileID: 8300000, guid: b30563a7cf0b981429e0729688c5f5d4, type: 3}
+  fbMixing: {fileID: 8300000, guid: 4f84071cd22de1449b2541a26e93a1c4, type: 3}
+  fbNoMixing: {fileID: 8300000, guid: e4b028352b7abaa408c9eef24eccd8c8, type: 3}
+  fbTrash: {fileID: 8300000, guid: a66867e0dc408e94890f423e09f9285e, type: 3}
+  fbSenderFalse: {fileID: 8300000, guid: e4b028352b7abaa408c9eef24eccd8c8, type: 3}
+  fbSenderTrue: {fileID: 8300000, guid: 4f84071cd22de1449b2541a26e93a1c4, type: 3}
+  fbWin: {fileID: 8300000, guid: 2107b3118aba22d44a12c5de964e8993, type: 3}
+  fbLoose: {fileID: 8300000, guid: b52efe93be3e73543a111cdc789057c7, type: 3}
+  effectVolume: 0.5
+  musicVolume: 0.5
